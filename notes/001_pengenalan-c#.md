@@ -175,7 +175,7 @@ Adalah shorthand operator. Misal terdapat kode `x = x + 5`, dapat dipersingkate 
 | Operator | Nama | Contoh         |
 | -------- | ---- | -------------- |
 | `&&`     | AND  | `true && true` |
-| `||`     | OR   | `true !! true` |  
+| ``       | OR   | `true !! true` |  
 | `!`      | NOT  | `!true`        |
 
 </details>
