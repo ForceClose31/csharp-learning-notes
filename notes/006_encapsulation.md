@@ -8,11 +8,14 @@
 
 #### Encapsulation
 
-Encapsulation merupakan salah satu pilar dalam OOP. Encapsulation memiliki arti enkapsulasi (garis bawahi pada **kapsul**), yang secara sederhana kita mengkapsul / membungkus suatu class agar class members (property dan method) tidak diakses secara langsung.
+Encapsulation adalah salah satu pilar utama dalam **Object-Oriented Programming (OOP)** yang bertujuan untuk menyembunyikan detail implementasi internal suatu objek dari pengguna luar. Dalam konsep ini, data (variabel) dan metode (fungsi) digabungkan dalam satu kesatuan yang disebut kelas dan akses ke data tersebut dikontrol melalui mekanisme **access modifier**.
+
+Encapsulation memungkinkan data dalam objek dilindungi agar tidak diakses atau diubah sembarangan oleh objek lain di luar kelasnya. Ini memastikan bahwa data hanya dapat dimodifikasi melalui metode yang sesuai, menjaga integritas data.
 
 #### Access Modifier
 
-Berbicara mengenai encapsulation, _Access Modifier_ menjadi salah satu topik yang perlu dipelajari. Access modifier mengatur bagaimana suatu class member dapat diakses. Access modifier terdiri dari:
+Berbicara mengenai encapsulation, _Access Modifier_ menjadi salah satu topik yang perlu dipelajari. Access modifier adalah kata kunci dalam C# yang digunakan untuk mengatur **tingkat aksesibilitas** anggota kelas (seperti variabel dan metode).
+Access modifier terdiri dari:
 
 - `public`, class member dapat diakses dari **manapun**
 - `private`, class member hanya dapat diakses dari **class yang sama**
@@ -20,6 +23,76 @@ Berbicara mengenai encapsulation, _Access Modifier_ menjadi salah satu topik yan
 - `internal`, class member dapat diakses dari **manapun** selama berasal dari 1 assembly yg sama.
 - `protected internal`, class member dapat diakses dari **manapun** selama masih 1 assembly atau dapat diakses dari assembly yg berbeda dengan syarat merupakan **child class** dari class yang bersangkutan
 - `private protected`, class member dapat diakses dari **child class nya**
+
+#### Contoh access modifier
+
+```cs
+using System;
+
+namespace AccessModifierDemo
+{
+    public class Employee
+    {
+        // Variabel private hanya dapat diakses dari dalam kelas
+        private int id;
+
+        // Property public dapat diakses dari mana saja
+        public string Name { get; set; }
+
+        // Variabel protected hanya dapat diakses dari kelas ini atau subclass
+        protected decimal salary;
+
+        // Method internal hanya dapat diakses dari dalam assembly/proyek ini
+        internal void SetID(int empID)
+        {
+            id = empID;
+        }
+
+        // Method protected internal dapat diakses dari kelas turunan atau dalam proyek yang sama
+        protected internal void SetSalary(decimal empSalary)
+        {
+            salary = empSalary;
+        }
+    }
+
+    // Class Manager mewarisi dari Employee
+    public class Manager : Employee
+    {
+        public void DisplayManagerInfo()
+        {
+            // Dapat mengakses variabel protected dari kelas induk
+            Console.WriteLine($"Manager Salary: {salary}");
+        }
+    }
+
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            Employee emp = new Employee();
+            Manager mgr = new Manager();
+
+            // Akses property public
+            emp.Name = "John";
+
+            // Akses method internal dalam proyek yang sama
+            emp.SetID(123);
+
+            // Akses method protected internal dalam proyek yang sama
+            mgr.SetSalary(5000);
+
+            mgr.DisplayManagerInfo();
+        }
+    }
+}
+```
+##### Penjelasan :
+
+- Variabel `id` bersifat `private`, hanya dapat diakses dari dalam kelas `Employee`.
+- Property `Name` bersifat `public`, sehingga bisa diakses dari mana saja.
+- Variabel `salary` bersifat `protected`, jadi hanya dapat diakses dari kelas `Employee` atau kelas turunannya seperti `Manager`.
+- Method `SetID` bersifat `internal`, sehingga hanya bisa diakses dari dalam proyek yang sama.
+- Method `SetSalary` bersifat `protected internal`, dapat diakses baik dari kelas turunan maupun dari dalam proyek yang sama.
 
 #### Contoh Encapsulation
 
