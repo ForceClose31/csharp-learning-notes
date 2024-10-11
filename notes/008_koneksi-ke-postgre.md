@@ -236,125 +236,147 @@ using (var cmd = new NpgsqlCommand(deleteQuery, conn))
 
 ```cs
 using Npgsql;
-using System;
 
-namespace EmployeeManagement
+class Program
 {
-    class Program
+    static string connString = "Host=localhost;Username=postgres;Password=QWEASDZXC31;Database=sampledb";
+
+    static void Main(string[] args)
     {
-        static string connString = "Host=localhost;Username=postgres;Password=QWEASDZXC31;Database=employee";
-
-        static void Main(string[] args)
+        using (var conn = new NpgsqlConnection(connString))
         {
-            int choice;
-            do
-            {
-                Console.WriteLine("\nEmployee Management System");
-                Console.WriteLine("1. Add Employee");
-                Console.WriteLine("2. View Employees");
-                Console.WriteLine("3. Update Employee");
-                Console.WriteLine("4. Delete Employee");
-                Console.WriteLine("5. Exit");
-                Console.Write("Choose an option: ");
-                choice = Convert.ToInt32(Console.ReadLine());
-
-                switch (choice)
-                {
-                    case 1:
-                        AddEmployee();
-                        break;
-                    case 2:
-                        ViewEmployees();
-                        break;
-                    case 3:
-                        UpdateEmployee();
-                        break;
-                    case 4:
-                        DeleteEmployee();
-                        break;
-                }
-            } while (choice != 5);
-        }
-
-        static void AddEmployee()
-        {
-            Console.Write("Enter Name: ");
-            string name = Console.ReadLine();
-            Console.Write("Enter Email: ");
-            string email = Console.ReadLine();
-
-            using (var conn = new NpgsqlConnection(connString))
+            try
             {
                 conn.Open();
-                string insertQuery = "INSERT INTO employees (name, email) VALUES (@name, @email)";
-                using (var cmd = new NpgsqlCommand(insertQuery, conn))
-                {
-                    cmd.Parameters.AddWithValue("name", name);
-                    cmd.Parameters.AddWithValue("email", email);
-                    cmd.ExecuteNonQuery();
-                    Console.WriteLine("Employee added successfully!");
-                }
-            }
-        }
+                Console.WriteLine("Koneksi ke database berhasil!");
+                CreateTable(conn);
 
-        static void ViewEmployees()
-        {
-            using (var conn = new NpgsqlConnection(connString))
-            {
-                conn.Open();
-                string selectQuery = "SELECT * FROM employees";
-                using (var cmd = new NpgsqlCommand(selectQuery, conn))
+                int choice;
+                do
                 {
-                    using (var reader = cmd.ExecuteReader())
+                    Console.WriteLine("\nCRUD Operations Menu");
+                    Console.WriteLine("1. Add User");
+                    Console.WriteLine("2. View Users");
+                    Console.WriteLine("3. Update User");
+                    Console.WriteLine("4. Delete User");
+                    Console.WriteLine("5. Exit");
+                    Console.Write("Choose an option: ");
+                    choice = Convert.ToInt32(Console.ReadLine());
+                    switch (choice)
                     {
-                        while (reader.Read())
-                        {
-                            Console.WriteLine($"ID: {reader["id"]}, Name: {reader["name"]}, Email: {reader["email"]}");
-                        }
+                        case 1:
+                            AddUser(conn);
+                            break;
+                        case 2:
+                            ViewUsers(conn);
+                            break;
+                        case 3:
+                            UpdateUser(conn);
+                            break;
+                        case 4:
+                            DeleteUser(conn);
+                            break;
                     }
-                }
+                } while (choice != 5);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Terjadi kesalahan: {ex.Message}");
             }
         }
+    }
 
-        static void UpdateEmployee()
+    static void CreateTable(NpgsqlConnection conn)
+    {
+        string createTableQuery = @"
+                DROP TABLE IF EXISTS users;
+                CREATE TABLE users (
+                    id SERIAL PRIMARY KEY,
+                    name VARCHAR(100) NOT NULL,
+                    email VARCHAR(100) NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                );
+            ";
+
+        using (var cmd = new NpgsqlCommand(createTableQuery, conn))
         {
-            Console.Write("Enter Employee ID to Update: ");
-            int id = Convert.ToInt32(Console.ReadLine());
-            Console.Write("Enter New Name: ");
-            string name = Console.ReadLine();
-
-            using (var conn = new NpgsqlConnection(connString))
-            {
-                conn.Open();
-                string updateQuery = "UPDATE employees SET name = @name WHERE id = @id";
-                using (var cmd = new NpgsqlCommand(updateQuery, conn))
-                {
-                    cmd.Parameters.AddWithValue("name", name);
-                    cmd.Parameters.AddWithValue("id", id);
-                    cmd.ExecuteNonQuery();
-                    Console.WriteLine("Employee updated successfully!");
-                }
-            }
+            cmd.ExecuteNonQuery();
+            Console.WriteLine("Tabel 'users' berhasil dibuat ulang.");
         }
+    }
 
-        static void DeleteEmployee()
+    static void AddUser(NpgsqlConnection conn)
+    {
+        Console.Write("Enter Name: ");
+        string? name = Console.ReadLine();
+        Console.Write("Enter Email: ");
+        string? email = Console.ReadLine();
+
+        name ??= "Default";
+        email ??= "Default";
+        string insertQuery = "INSERT INTO users (name, email) VALUES (@name, @email)";
+        using (var cmd = new NpgsqlCommand(insertQuery, conn))
         {
-            Console.Write("Enter Employee ID to Delete: ");
-            int id = Convert.ToInt32(Console.ReadLine());
+            cmd.Parameters.AddWithValue("name", name);
+            cmd.Parameters.AddWithValue("email", email);
+            cmd.ExecuteNonQuery();
+            Console.WriteLine("User berhasil ditambahkan!");
+        }
+    }
 
-            using (var conn = new NpgsqlConnection(connString))
+    static void ViewUsers(NpgsqlConnection conn)
+    {
+        string selectQuery = "SELECT * FROM users";
+        using (var cmd = new NpgsqlCommand(selectQuery, conn))
+        {
+            using (var reader = cmd.ExecuteReader())
             {
-                conn.Open();
-                string deleteQuery = "DELETE FROM employees WHERE id = @id";
-                using (var cmd = new NpgsqlCommand(deleteQuery, conn))
+                Console.WriteLine("\nDaftar Pengguna:");
+                while (reader.Read())
                 {
-                    cmd.Parameters.AddWithValue("id", id);
-                    cmd.ExecuteNonQuery();
-                    Console.WriteLine("Employee deleted successfully!");
+                    Console.WriteLine($"ID: {reader["id"]}, Name: {reader["name"]}, Email: {reader["email"]}, Created At: {reader["created_at"]}");
                 }
             }
         }
     }
-}
 
+    static void UpdateUser(NpgsqlConnection conn)
+    {
+        Console.Write("Enter User ID to Update: ");
+        int id = Convert.ToInt32(Console.ReadLine());
+        Console.Write("Enter New Name: ");
+        string? name = Console.ReadLine();
+
+        name ??= "Default";
+
+        string updateQuery = "UPDATE users SET name = @name WHERE id = @id";
+        using (var cmd = new NpgsqlCommand(updateQuery, conn))
+        {
+            cmd.Parameters.AddWithValue("name", name);
+            cmd.Parameters.AddWithValue("id", id);
+            int rowsAffected = cmd.ExecuteNonQuery();
+            if (rowsAffected > 0)
+                Console.WriteLine("User berhasil diperbarui!");
+            else
+                Console.WriteLine("User tidak ditemukan.");
+        }
+    }
+
+    static void DeleteUser(NpgsqlConnection conn)
+    {
+        Console.Write("Enter User ID to Delete: ");
+        int id = Convert.ToInt32(Console.ReadLine());
+
+        string deleteQuery = "DELETE FROM users WHERE id = @id";
+        using (var cmd = new NpgsqlCommand(deleteQuery, conn))
+        {
+            cmd.Parameters.AddWithValue("id", id);
+            int rowsAffected = cmd.ExecuteNonQuery();
+            if (rowsAffected > 0)
+                Console.WriteLine("User berhasil dihapus!");
+            else
+                Console.WriteLine("User tidak ditemukan.");
+        }
+    }
+}
 ```
