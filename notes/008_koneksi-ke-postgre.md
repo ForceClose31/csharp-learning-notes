@@ -123,7 +123,6 @@ command.Parameters.Clear();
 - Setelah perintah dijalankan, disarankan memanggil method `.Parameters.Clear()` agar insert data selanjutnya dapat memiliki value yang berbeda.
 
 ```cs
-```cs
 string insertQuery = "INSERT INTO mahasiswa (name) VALUES (@name)";
 using (var cmd = new NpgsqlCommand(insertQuery, conn))
 {
@@ -131,7 +130,6 @@ using (var cmd = new NpgsqlCommand(insertQuery, conn))
     int rowsAffected = cmd.ExecuteNonQuery();
     Console.WriteLine($"{rowsAffected} row(s) inserted.");
 }
-```
 ```
 
 #### Select data
